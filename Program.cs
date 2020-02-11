@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -50,6 +51,7 @@ namespace TheWanderingInn {
         }
 
         private static async Task ExportVolume(string volumeName, string volumeHeader, List<string> chapters) {
+            var timer = Stopwatch.StartNew();
             Console.WriteLine($"Exporting {volumeName} with {chapters.Count} chapters");
             var volumeDirectory = Directory.CreateDirectory(Path.Combine(Options.Output, volumeName));
 
@@ -58,6 +60,14 @@ namespace TheWanderingInn {
 
             var sb = new StringBuilder();
             sb.AppendLine("<html>");
+            sb.AppendLine("<head>");
+            sb.AppendLine("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />");
+            sb.AppendLine("<meta name=\"author\" content=\"pirate aba\">");
+            sb.AppendLine($"<meta name=\"description\" content=\"The Wandering Inn: {volumeName}\">");
+            sb.AppendLine("<meta name=\"classification\" content=\"Fantasy\" >");
+            sb.AppendLine("<meta name=\"series\" content=\"The Wandering Inn\" >");
+            sb.AppendLine($"<meta name=\"series_index\" content=\"{volumeName.Last()}\" >");
+            sb.AppendLine($"<title>The Wandering Inn: {volumeName}</title>");
             sb.AppendLine("<body>");
             sb.AppendLine("<h1>Table of Contents</h1>");
             sb.AppendLine("<p style=\"text-indent:0pt\">");
@@ -67,7 +77,7 @@ namespace TheWanderingInn {
                 var chapterInformation = chapterExtractor.Matches(chapter);
                 var chapterUrl = chapterInformation[0].Groups[1].ToString();
                 var chapterName = chapterInformation[0].Groups[2].ToString();
-                
+
                 Console.WriteLine($"Exporting {chapterName} in volume {volumeName} ({i+1}/{actualChapters.Count})");
 
                 var fileName = await ExportChapter(i, chapterUrl, chapterName, volumeDirectory.FullName);
@@ -78,6 +88,7 @@ namespace TheWanderingInn {
             sb.AppendLine("</body>");
             sb.AppendLine("</html>");
             File.WriteAllText(Path.Combine(volumeDirectory.FullName, "index.html"), sb.ToString());
+            Console.WriteLine($"Finished exporting {volumeName} with {chapters.Count} chapters - Elapsed: {timer.Elapsed}");
         }
 
         private static async Task<string> ExportChapter(int chapterIndex, string url, string chapterName, string basePath) {
