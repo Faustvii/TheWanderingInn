@@ -68,6 +68,7 @@ namespace TheWanderingInn {
             sb.AppendLine("<meta name=\"series\" content=\"The Wandering Inn\" >");
             sb.AppendLine($"<meta name=\"series_index\" content=\"{volumeName.Last()}\" >");
             sb.AppendLine($"<title>The Wandering Inn: {volumeName}</title>");
+            sb.AppendLine("</head>");
             sb.AppendLine("<body>");
             sb.AppendLine("<h1>Table of Contents</h1>");
             sb.AppendLine("<p style=\"text-indent:0pt\">");
@@ -99,8 +100,9 @@ namespace TheWanderingInn {
             var chapterStart = contents.FindIndex(x => x.Contains("<div class=\"entry-content\">"));
             var chapterEnd = contents.FindIndex(chapterStart, x => x.Contains("<hr />"));
             var chapterContents = contents.Skip(chapterStart).Take(chapterEnd - chapterStart);
-            chapterContents = chapterContents.Skip(1).Prepend($"<h1>{chapterName}</h1>");
-            var fileName = $"{chapterIndex}_{chapterName.Replace(":", " - ")}.html";
+            chapterContents = chapterContents.Skip(1).Prepend($"<h1 class=\"chapter\">{chapterName}</h1>");
+            chapterContents = chapterContents.Prepend("<html><body>").Append("</body></html>");
+            var fileName = $"{chapterName.Replace(":", " - ")}.html";
             var filePath = Path.Combine(basePath, fileName);
             File.WriteAllLines(filePath, chapterContents);
             return fileName;
